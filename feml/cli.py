@@ -37,9 +37,11 @@ def rodar_template(repo: str):
     """
     Executa um template cookiecutter de um repositório.
     """
+    import tempfile
+
     repo_url = f"https://github.com/{USUARIO_PADRAO}/{repo}.git"
     destino = f"./.cache/{repo}"
-    perguntas_url = f"https://raw.githubusercontent.com/{USUARIO_PADRAO}/{repo}/main/perguntas.yaml"
+    perguntas_url = f"https://raw.githubusercontent.com/{USUARIO_PADRAO}/{repo}/main/cookiecutter.yaml"
 
     print(f"🔍 Verificando perguntas.yaml no repositório {repo}...")
     resposta = requests.get(perguntas_url)
@@ -53,7 +55,7 @@ def rodar_template(repo: str):
     print(f"🔄 Clonando {repo_url}...")
     subprocess.run(["git", "clone", repo_url, destino], check=True)
 
-    perguntas_path = os.path.join(destino, "perguntas.yaml")
+    perguntas_path = os.path.join(destino, "cookiecutter.yaml")
     print("📄 Lendo perguntas...")
     with open(perguntas_path, "r") as f:
         perguntas = yaml.safe_load(f)
@@ -80,13 +82,12 @@ def rodar_template(repo: str):
 
         respostas[chave] = valor
 
-    cookiecutter_json_path = os.path.join(destino, "template", "cookiecutter.json")
-    print("🧩 Gerando cookiecutter.json...")
-    with open(cookiecutter_json_path, "w") as f:
-        json.dump(respostas, f, indent=2)
-
     print("🚀 Rodando cookiecutter...")
-    cookiecutter(os.path.join(destino, "template"))
+    cookiecutter(
+        os.path.join(destino),
+        no_input=True,
+        extra_context=respostas
+    )
 
 if __name__ == "__main__":
     app()
