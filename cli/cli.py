@@ -1,15 +1,16 @@
 import typer
-from .config import USUARIO_PADRAO
 from .github import repositorios_user, repositorios_org
 from .cookie import diretorio, perguntas, respostas, run_cookie
-
+from typing import Optional
 app = typer.Typer(help="Ferramenta CLI FEML")
 repos_app = typer.Typer()
 app.add_typer(repos_app, name="repos")
 
 @repos_app.command("user")
-def listar_repositorios_user(user: str = typer.Option(USUARIO_PADRAO, help="Nome de usuário do GitHub")):
-    """Lista repositórios públicos de um usuário do GitHub."""
+def listar_repositorios_user(
+    user: str
+):
+    """Lista repositórios públicos de um usuário."""
     try:
         repos = repositorios_user(user)
         for repo in repos:
@@ -18,8 +19,10 @@ def listar_repositorios_user(user: str = typer.Option(USUARIO_PADRAO, help="Nome
         print(f"Erro: {e}")
 
 @repos_app.command("org")
-def listar_repositorios_org(org: str = typer.Argument(..., help="Nome da organização do GitHub")):
-    """Lista repositórios públicos de uma organização do GitHub."""
+def listar_repositorios_org(
+    org: str
+):
+    """Lista repositórios públicos de uma organização."""
     try:
         repos = repositorios_org(org)
         for repo in repos:
@@ -30,11 +33,18 @@ def listar_repositorios_org(org: str = typer.Argument(..., help="Nome da organiz
 @app.command("run")
 def run(
     repo: str = typer.Argument(..., help="Nome do repositório contendo o template"),
-    user: str = typer.Option(USUARIO_PADRAO, help="Nome de usuário do GitHub")
+    org: Optional[str] = typer.Option(None, "--org", "-o", help="Nome da organização do GitHub"),
+    user: Optional[str] = typer.Option(None, "--user", "-u", help="Nome do usuário do GitHub"),
 ):
     """Executa um template cookiecutter de um repositório."""
     try:
-        destino = diretorio(repo, user)
+        if org:
+            destino = diretorio(repo, org)
+        elif user:
+            destino = diretorio(repo, user)
+        else:
+            raise ValueError("Você deve especificar uma organização ou um usuário (--org ou --user).")
+        
         perguntas_dict = perguntas(destino)
         respostas_dict = respostas(perguntas_dict)
         run_cookie(destino, respostas_dict)

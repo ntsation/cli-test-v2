@@ -7,10 +7,10 @@ import git
 from cookiecutter.main import cookiecutter
 from .config import DIRETORIO_CACHE
 
-def diretorio(repo: str, nome_usuario: str) -> Path:
-    repo_url = f"https://github.com/{nome_usuario}/{repo}.git"
+def diretorio(repo: str, nome: str) -> Path:
+    repo_url = f"https://github.com/{nome}/{repo}.git"
     destino = DIRETORIO_CACHE / repo
-    
+
     if destino.exists():
         shutil.rmtree(destino)
     DIRETORIO_CACHE.mkdir(exist_ok=True)
@@ -21,15 +21,15 @@ def diretorio(repo: str, nome_usuario: str) -> Path:
     except git.exc.GitCommandError as e:
         print(f"Erro ao clonar o repositório: {e}")
         raise typer.Exit(code=1)
-    
+
     return destino
 
 def perguntas(template_path: Path) -> Dict[str, Any]:
-    perguntas = template_path / "cookiecutter.yaml"
-    if not perguntas.exists():
+    perguntas_path = template_path / "cookiecutter.yaml"
+    if not perguntas_path.exists():
         raise FileNotFoundError("Arquivo cookiecutter.yaml não encontrado")
     
-    with open(perguntas, "r") as f:
+    with open(perguntas_path, "r") as f:
         return yaml.safe_load(f)
 
 def respostas(perguntas: Dict[str, Any]) -> Dict[str, Any]:
@@ -38,19 +38,24 @@ def respostas(perguntas: Dict[str, Any]) -> Dict[str, Any]:
         prompt = dados.get("prompt", chave)
         padrao = dados.get("default", "")
         tipo_valor = dados.get("type", "string")
-        
-        valor = typer.prompt(prompt, default=padrao) if padrao else typer.prompt(prompt)
-        
+
+        valor = typer.prompt(f"{prompt}", default=padrao) if padrao else typer.prompt(f"{prompt}")
+
         if tipo_valor == "int":
             valor = int(valor)
         elif tipo_valor == "float":
             valor = float(valor)
         elif tipo_valor == "bool":
             valor = valor.lower() in ["true", "1", "yes", "y", "sim", "s"]
-        
+
         respostas[chave] = valor
+
     return respostas
 
 def run_cookie(template_path: Path, respostas: Dict[str, Any]) -> None:
     print("🚀 Executando cookiecutter...")
-    cookiecutter(str(template_path), no_input=True, extra_context=respostas)
+    cookiecutter(
+        str(template_path),
+        no_input=True,
+        extra_context=respostas
+    )
