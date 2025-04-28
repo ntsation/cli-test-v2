@@ -1,4 +1,15 @@
-# pyproject.toml
-[build-system]
-requires = ["setuptools", "wheel"]
-build-backend = "setuptools.build_meta"
+[project]
+name = "feml"
+version = "0.1.0"
+description = "Ferramenta de automação para templates com cookiecutter"
+authors = [{ name = "Nathan Souza", email = "nathan.souza@a3data.com.br" }]
+dependencies = [
+    "typer[all]",
+    "requests",
+    "PyYAML",
+    "cookiecutter",
+    "GitPython"
+]
+
+[project.scripts]
+feml = "cli.cli:main"
