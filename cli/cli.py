@@ -2,6 +2,7 @@ import typer
 from .github import repositorios_user, repositorios_org
 from .cookie import diretorio, perguntas, respostas, run_cookie
 from typing import Optional
+
 app = typer.Typer(help="Ferramenta CLI FEML")
 repos_app = typer.Typer()
 app.add_typer(repos_app, name="repos")

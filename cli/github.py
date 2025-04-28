@@ -26,7 +26,7 @@ def repositorios_user(user: str) -> list:
         "Accept": "application/vnd.github+json"
     }
 
-    resposta = requests.get(url, headers=headers)
+    resposta = requests.get(url, headers=headers, timeout=30)
     if resposta.status_code != 200:
         raise typer.BadParameter(f"Erro ao buscar repositórios do usuário: {resposta.status_code} - {resposta.text}")
 
@@ -40,7 +40,7 @@ def repositorios_org(org: str) -> list:
         "Accept": "application/vnd.github+json"
     }
 
-    resposta = requests.get(url, headers=headers)
+    resposta = requests.get(url, headers=headers, timeout=30)
     if resposta.status_code != 200:
         raise typer.BadParameter(f"Erro ao buscar repositórios da organização: {resposta.status_code} - {resposta.text}")
 
