@@ -2,7 +2,7 @@
 Utilitários para trabalhar com templates.
 """
 import shutil
-import subprocess
+import git
 import yaml
 import typer
 from pathlib import Path
@@ -34,7 +34,11 @@ def preparar_diretorio_template(repo: str, nome_usuario: str) -> Path:
     
     # Clonar o repositório
     print(f"🔄 Clonando {repo_url}...")
-    subprocess.run(["git", "clone", repo_url, str(destino)], check=True)
+    try:
+        git.Repo.clone_from(repo_url, str(destino))
+    except git.exc.GitCommandError as e:
+        print(f"❌ Erro ao clonar o repositório: {e}")
+        raise typer.Exit(code=1)
     
     return destino
 
