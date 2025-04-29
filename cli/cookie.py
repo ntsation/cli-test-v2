@@ -53,9 +53,11 @@ def respostas(perguntas: Dict[str, Any]) -> Dict[str, Any]:
     return respostas
 
 def run_cookie(template_path: Path, respostas: Dict[str, Any]) -> None:
-    print("🚀 Executando cookiecutter...")
     cookiecutter(
         str(template_path),
         no_input=True,
         extra_context=respostas
     )
+
+    if DIRETORIO_CACHE.exists():
+        shutil.rmtree(DIRETORIO_CACHE)
