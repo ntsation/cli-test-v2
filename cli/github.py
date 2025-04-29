@@ -18,9 +18,14 @@ def token_github() -> str:
 
     return github_info["oauth_token"]
 
-def repositorios_user(user: str) -> list:
+def repositorios_user(user: str = None) -> list:
     token = token_github()
-    url = f"https://api.github.com/users/{user}/repos?per_page=100&type=all"
+
+    if user:
+        url = f"https://api.github.com/users/{user}/repos?per_page=100&type=all"
+    else:
+        url = "https://api.github.com/user/repos?per_page=100&type=all"
+
     headers = {
         "Authorization": f"token {token}",
         "Accept": "application/vnd.github+json"
@@ -28,7 +33,7 @@ def repositorios_user(user: str) -> list:
 
     resposta = requests.get(url, headers=headers, timeout=30)
     if resposta.status_code != 200:
-        raise typer.BadParameter(f"Erro ao buscar repositórios do usuário: {resposta.status_code} - {resposta.text}")
+        raise typer.BadParameter(f"Erro ao buscar repositórios: {resposta.status_code} - {resposta.text}")
 
     return resposta.json()
 
