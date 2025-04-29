@@ -7,13 +7,15 @@ app = typer.Typer(help="Ferramenta CLI FEML")
 repos_app = typer.Typer()
 app.add_typer(repos_app, name="repos")
 
+
 @repos_app.command("user")
 def listar_repositorios_user(
-    user: str
+    user: str = typer.Option(None, help="Nome do usuário. Se omitido, lista repositórios do usuário autenticado.")
 ):
-    """Lista repositórios públicos de um usuário."""
     try:
         repos = repositorios_user(user)
+        if not repos:
+            print("Nenhum repositório encontrado.")
         for repo in repos:
             print(f"-> {repo['name']}")
     except Exception as e:
