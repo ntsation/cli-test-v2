@@ -5,12 +5,17 @@ from typing import Optional
 
 app = typer.Typer(help="Ferramenta CLI FEML")
 repos_app = typer.Typer()
+list_app = typer.Typer()
+
+repos_app.add_typer(list_app, name="list")
 app.add_typer(repos_app, name="repos")
 
+template_app = typer.Typer(help="Comandos relacionados a templates")
+app.add_typer(template_app, name="template")
 
-@repos_app.command("user")
+@list_app.command("user")
 def listar_repositorios_user(
-    user: str = typer.Option(None, help="Nome do usuário. Se omitido, lista repositórios do usuário autenticado.")
+    user: str = typer.Option(None, "--user", "-u", help="Nome do usuário. Se omitido, lista repositórios do usuário autenticado.")
 ):
     try:
         repos = repositorios_user(user)
@@ -21,11 +26,10 @@ def listar_repositorios_user(
     except Exception as e:
         print(f"Erro: {e}")
 
-@repos_app.command("org")
+@list_app.command("org")
 def listar_repositorios_org(
     org: str
 ):
-    """Lista repositórios públicos de uma organização."""
     try:
         repos = repositorios_org(org)
         for repo in repos:
@@ -33,15 +37,18 @@ def listar_repositorios_org(
     except Exception as e:
         print(f"Erro: {e}")
 
-@app.command("run")
-def run(
+
+@template_app.command("run")
+def run_template(
     repo: str = typer.Argument(..., help="Nome do repositório contendo o template"),
     org: Optional[str] = typer.Option(None, "--org", "-o", help="Nome da organização do GitHub"),
     user: Optional[str] = typer.Option(None, "--user", "-u", help="Nome do usuário do GitHub"),
 ):
     """Executa um template cookiecutter de um repositório."""
     try:
-        if org:
+        if org and user:
+            raise ValueError("Escolha apenas um entre --org e --user.")
+        elif org:
             destino = diretorio(repo, org)
         elif user:
             destino = diretorio(repo, user)
