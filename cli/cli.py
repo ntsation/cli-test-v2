@@ -1,10 +1,10 @@
 import typer
 from .github import repositorios_user, repositorios_org
-from .cookie import diretorio, perguntas, respostas, run_cookie
+from .cookie import run_cookie
 from typing import Optional
 
 app = typer.Typer(help="Ferramenta CLI FEML")
-repos_app = typer.Typer()
+repos_app = typer.Typer(help="Comandos relacionados aos repositórios")
 list_app = typer.Typer()
 
 repos_app.add_typer(list_app, name="list")
@@ -37,28 +37,23 @@ def listar_repositorios_org(
     except Exception as e:
         print(f"Erro: {e}")
 
-
 @template_app.command("run")
 def run_template(
     repo: str = typer.Argument(..., help="Nome do repositório contendo o template"),
     org: Optional[str] = typer.Option(None, "--org", "-o", help="Nome da organização do GitHub"),
     user: Optional[str] = typer.Option(None, "--user", "-u", help="Nome do usuário do GitHub"),
 ):
-    """Executa um template cookiecutter de um repositório."""
+    """Executa um template Cookiecutter de um repositório remoto (GitHub)."""
     try:
         if org and user:
             raise ValueError("Escolha apenas um entre --org e --user.")
-        elif org:
-            destino = diretorio(repo, org)
-        elif user:
-            destino = diretorio(repo, user)
-        else:
+        elif not (org or user):
             raise ValueError("Você deve especificar uma organização ou um usuário (--org ou --user).")
-        
-        perguntas_dict = perguntas(destino)
-        respostas_dict = respostas(perguntas_dict)
-        run_cookie(destino, respostas_dict)
+
+        dono = org or user
+        run_cookie(repo=repo, usuario=dono)
         print("Execução do template concluída com sucesso!")
+
     except Exception as e:
         print(f"Erro: {e}")
         raise typer.Exit(code=1)
